@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 from torch.optim import Adam
 from datetime import datetime
 
-horaInicio = datetime.now()
-
 def plotearCaras(imagenes):
     figura, ejes = plt.subplots(4,8)
     for i in range(4):
@@ -17,17 +15,6 @@ def plotearCaras(imagenes):
             imgCara = np.transpose(imagenes[n].numpy(),(1,2,0))
             ejes[i, j].imshow(imgCara)
     plt.show()
-
-print("1. Crear el DataSet y DataLoader de Entrenamiento con las caras con y sin lentes")
-transform = T.Compose([T.Resize(256), T.ToTensor()])
-dataset = torchvision.datasets.ImageFolder(root="datasets/Lentes", transform=transform)
-batch_size=32
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,shuffle=True)
-imagenes, etiquetas = next(iter(dataloader))
-imagen = imagenes[0]
-print("Total de Imagenes en el DataSet: ", len(dataset))
-print("Shape Imagen: ", imagen.nelement())
-#plotearCaras(imagenes)
 
 latent_dims=100
 class Encoder(nn.Module):
@@ -54,9 +41,8 @@ class Encoder(nn.Module):
         x = torch.flatten(x, start_dim=1)
         x = F.relu(self.linear1(x))
         mu =  self.linear2(x)
-        std = torch.exp(0.5 * self.linear3(x))
-        epsilon = torch.randn_like(std)
-        z = mu + (std * epsilon)
+        std = torch.exp(self.linear3(x))
+        z = mu + std*self.N.sample(mu.shape)
         return mu, std, z
 
 class Decoder(nn.Module):   
@@ -95,48 +81,23 @@ class VAE(nn.Module):
         mu, std, z = self.encoder(x)
         return mu, std, self.decoder(z)
 
-print("2. Crear el Modelo VAE")
+print("1. Crear el DataSet y DataLoader de Pruebas con las caras con y sin lentes")
+transform = T.Compose([T.Resize(256), T.ToTensor()])
+dataset = torchvision.datasets.ImageFolder(root="datasets/LentesTest", transform=transform)
+batch_size=16
+dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
+imagenes, etiquetas = next(iter(dataloader))
+
+print("2. Cargar el Modelo VAE Pre-Entrenado con los pesos")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 modelo=VAE().to(device)
-#lr=1e-4
-#optimizador=torch.optim.Adam(modelo.parameters(),lr=lr,weight_decay=1e-5)
-optimizador = torch.optim.AdamW(modelo.parameters(), lr=0.0005, weight_decay=0.001)
+modelo.eval()
+modelo.load_state_dict(torch.load('preentrenados/VAE/Lentes/VAE_Lentes_487_512.5182352437602.pt', map_location=device))
 
-print("3. Entrenar el Modelo VAE")
-def funcion_perdida(x, x_hat, mean, logvar):
-    MSE = F.mse_loss(x_hat, x, reduction='sum')
-    KLD = - 0.5 * torch.sum(1+ logvar - mean.pow(2) - logvar.exp())
-    return MSE + KLD
-
-def train_epoch(epoch):
-    modelo.train()
-    perdida_total = 0.0
-    nBucles = len(dataloader)
-    for i,(imgs, _) in enumerate(dataloader):
-        print(f"Item: {i+1}/{nBucles}, Epoca: {epoch+1}")
-        imgs = imgs.to(device)
-        optimizador.zero_grad()
-        mu, std, out = modelo(imgs)
-        perdida = funcion_perdida(imgs, out, mu, std)
-        perdida_total += perdida.item()
-        perdida.backward()
-        optimizador.step()
-        perdida_promedio = perdida_total/((i+1)*batch_size)
-    print(f'Epoca {epoch+1} - Perdida {perdida_promedio}')
-    if(perdida_promedio<1000):        
-        archivo = "preentrenados/VAE/Lentes/VAE_Lentes_" + str(epoch+1) + "_" + str(perdida_promedio) + ".pt"
-        torch.save(modelo.state_dict(), archivo)
-
-for i in range(1000):
-    train_epoch(i)
-    with torch.no_grad():
-        noise = torch.randn(32,latent_dims).to(device)
-        imgs = modelo.decoder(noise).cpu()
-        #plotearCaras(imgs)
-plotearCaras(imgs)
-archivo = "preentrenados/VAE/Lentes/VAE_Lentes_Final.pt"
-torch.save(modelo.state_dict(), archivo)
-
-horaFin = datetime.now()
-tiempoSeg = (horaFin - horaInicio).total_seconds()
-print(f"Se creo y entreno el Modelo VAE de Caras con Lentes en {tiempoSeg} seg")
+print("3. Generar Nuevos Rostros y Dibujarlos")
+imgs = imagenes.to(device)
+mu, std, out = modelo(imgs)
+imagenes=torch.cat([imgs[0:4],imgs[4:8],out[0:4],out[4:8],
+                  imgs[8:12],imgs[12:16],out[8:12],out[12:16]],
+                 dim=0).detach().cpu()
+plotearCaras(imagenes)
