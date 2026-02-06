@@ -1,0 +1,31 @@
+import torch
+import torchvision
+import torchvision.transforms as T
+from torch import nn
+import torch.nn.functional as F
+import matplotlib.pyplot as plt
+import numpy as np
+import cv2, os
+
+print("Demo 35: Creando Archivos de Caras de Alumnos con DC-GAN")
+device="cuda" if torch.cuda.is_available() else "cpu"
+
+archivo = "preentrenados/GAN/Alumnos/GAN_Alumnos_1000_7.091213226318359.pt"
+G=torch.jit.load(archivo, map_location=device)
+G.eval()
+
+batch_size = 10
+ruta = "C:/Data/Python/2026_01_IAG/Demos/datasets/Alumnos_DCGAN"
+c=0
+for i in range(10):
+    ruido=torch.randn(batch_size,100,1,1).to(device=device)
+    imagenesGeneradas=G(ruido).cpu().detach()
+    for j in range(batch_size):
+        c = c + 1
+        print("Creando imagen: " + str(c))
+        img = imagenesGeneradas[j]/2+0.5 #-1,1
+        img = (img.clamp(0, 1) * 255).byte() #0,1 => 0,255
+        img = img.permute(1,2,0).cpu().numpy()
+        img = cv2.resize(img,(200,200))
+        archivo = os.path.join(ruta, str(c) + ".png")
+        cv2.imwrite(archivo, img)
