@@ -33,8 +33,8 @@ if(video.isOpened()):
             img = cv2.resize(img, (256,256))
             imgBigote = imgConBigote.copy()
             augmentations = transforms(image=imgBigote, image0=img)
-            imgBigote = augmentations["image0"]
-            imgNormal = augmentations["image"]
+            imgNormal = augmentations["image0"]
+            imgBigote = augmentations["image"]
             dstBigote = [(imgNormal, imgBigote)]
             loaderBigote=torch.utils.data.DataLoader(dstBigote,batch_size=batch_size, shuffle=True, pin_memory=True, drop_last=True)
             for sinbigote,conbigote in loaderBigote:

@@ -38,7 +38,7 @@ if(video.isOpened()):
             dstSonrisa = [(imgSinrisa, imgConrisa)]
             loaderSonrisa=torch.utils.data.DataLoader(dstSonrisa,batch_size=batch_size, shuffle=True, pin_memory=True, drop_last=True)
             for sinrisa,conrisa in loaderSonrisa:
-                fakeRisa=gen(conrisa.to(device)).squeeze(0)
+                fakeRisa=gen(sinrisa.to(device)).squeeze(0)
             imgConrisa = fakeRisa/2+0.5
             imgConrisa = (imgConrisa.clamp(0, 1) * 255).byte()
             imgConrisa = imgConrisa.permute(1,2,0).cpu().numpy()

@@ -15,7 +15,7 @@ import numpy as np
 from modGAN import LoadData, Discriminador, Generador
 
 horaInicio = datetime.now()
-print("Demo 66: Entrenamiento de un Modelo Cycle-GAN de CelebA para Bigotes y Barba")
+print("Demo 66: Entrenamiento de un Modelo Cycle-GAN de CelebA para Bigotes")
 
 def iniciarPesos(m):
     name = m.__class__.__name__
@@ -81,7 +81,7 @@ def train_epoch(epoca,disc_A, disc_B, gen_A, gen_B, loader, opt_disc, opt_gen, l
         print(f"Epoca: {epoca} - Item: {i+1}/{total_batches} | D_loss: {D_loss.item():.4f} | G_loss: {G_loss.item():.4f}")
         if i % 100 == 0:
             test(epoca,i,A,B,fake_A,fake_B)
-batch_size=8
+batch_size=1
 
 print("1. Cargar el DataSet y DataLoader de CelebA")
 transforms = albumentations.Compose(
@@ -126,4 +126,4 @@ torch.save(gen_B.state_dict(), "preentrenados/GAN/Bigote/gen_conbigote.pth")
 
 horaFin = datetime.now()
 tiempoSeg = (horaFin - horaInicio).total_seconds()
-print(f"Se creo y entreno el Modelo Cycle GAN de Bigotes y Barbas en {tiempoSeg} seg")
+print(f"Se creo y entreno el Modelo Cycle GAN de Bigotes en {tiempoSeg} seg")

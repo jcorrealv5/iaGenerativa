@@ -10,7 +10,7 @@ from albumentations.pytorch import ToTensorV2
 print("Demo 62: Cambio de Sexo a Femenino en Tiempo Real")
 rutaSexo = "C:/Data/Python/2026_01_IAG/Demos/datasets/TestSexo/"
 rutaSexoMujer = rutaSexo + "Femenino"
-archivoSexoMujer = os.path.join(rutaPeloRubio, "Dua_Lipa.jpg")
+archivoSexoMujer = os.path.join(rutaSexoMujer, "Dua_Lipa.jpg")
 imgSexoMujer = np.array(Image.open(archivoSexoMujer).convert("RGB"))
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -37,8 +37,8 @@ if(video.isOpened()):
             imgHombre = augmentations["image"]
             dstSexo = [(imgMujer, imgHombre)]
             loaderSexo=torch.utils.data.DataLoader(dstSexo,batch_size=batch_size, shuffle=True, pin_memory=True, drop_last=True)
-            for mujer,hombre in loaderPelo:
-                fakeMujer=gen(hombre.to(device)).squeeze(0)
+            for mujer,hombre in loaderSexo:
+                fakeMujer=gen(mujer.to(device)).squeeze(0)
             imgMujer = fakeMujer/2+0.5
             imgMujer = (imgMujer.clamp(0, 1) * 255).byte()
             imgMujer = imgMujer.permute(1,2,0).cpu().numpy()

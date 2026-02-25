@@ -1,47 +1,24 @@
-import sys
-sys.path.append("C:/Data/Python/2026_01_IAG/Demos/preentrenados/GAN/StyleGAN3/")
-#sys.path.append("C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build/")
-from urllib.request import urlopen
-import torch, dnnlib, os, pickle
-import torch_utils
-import matplotlib.pyplot as plt
+import torch, torchvision, os, cv2
 
-def plotearImagenes(imagenesGeneradas, filas, cols, titulo):
-    fig, axes = plt.subplots(filas, cols)
-    for i in range(filas*cols):
-        row = i // cols
-        col = i % cols
-        img = imagenesGeneradas[i]/2+0.5 #-1,1
-        img = (img.clamp(0, 1) * 255).byte() #0,1 => 0,255
+print("Demo 71: Usando Torch-Hub GAN Zoo Models - DCGAN para generar Archivos de Ropa en Disco\n")
+directorio = input("Ingresa el Directorio donde deseas generar los Archivos: ")
+if(os.path.isdir(directorio)):
+    nMuestras = int(input("\nNumero de Muestras o Archivos a Generar: "))
+    use_gpu = True if torch.cuda.is_available() else False
+    print("GPU: ", use_gpu)
+    model = torch.hub.load('facebookresearch/pytorch_GAN_zoo:hub','DCGAN', pretrained=True, useGPU=use_gpu)
+    ruido, _ = model.buildNoiseData(nMuestras)
+    with torch.no_grad():
+        imagenesGeneradas = model.test(ruido)
+    print("\nGenerando Imagenes a Disco...")
+    for i in range(nMuestras):
+        print(f"Imagen: {i+1}")
+        img = imagenesGeneradas[i]/2+0.5
+        img = (img.clamp(0, 1) * 255).byte()
         img = img.permute(1,2,0).cpu().numpy()
-        axes[row, col].imshow(img)
-        axes[row, col].set_xticks([])
-        axes[row, col].set_yticks([])
-    plt.title(titulo)
-    plt.show()
-
-print("Demo 71: StyleGAN3")
-archivo = "stylegan3-r-ffhq-1024x1024.pkl"
-if(not os.path.isfile(archivo)):
-    url = "https://api.ngc.nvidia.com/v2/models/nvidia/research/stylegan3/versions/1/files/stylegan3-r-ffhq-1024x1024.pkl"
-    response = urlopen(url)
-    if response.getcode() == 200:    
-        with open(archivo, "wb") as f:
-            f.write(response.read())
-            print(f"Archivo: {archivo} fue creado")
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        archivo = os.path.join(directorio, str(i+1) + ".png")
+        cv2.imwrite(archivo, img)
+    print(f"Se crearon {nMuestras} archivos en disco")
 else:
-    print(f"El archivo: {archivo} ya existe")
-print(f"Cargando Archivo: {archivo}")
-with open(archivo, "rb") as f:
-    G = pickle.load(f)['G_ema']
-print("Creando Ruido")
-z = torch.randn([1, G.z_dim])
-c = None
-print("Generando una Imagen")
-imagenesGeneradas = G(z, c)
-img = imagenesGeneradas[0]/2+0.5
-img = (img.clamp(0, 1) * 255).byte()
-img = img.permute(1,2,0).cpu().numpy()
-print("Shape Imagen Generada: ", img.shape)
-plt.imshow(img)
-plt.show()
+    print("Directorio Destino No existe")

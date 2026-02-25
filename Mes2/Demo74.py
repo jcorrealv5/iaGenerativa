@@ -4,8 +4,10 @@ from urllib.request import urlopen
 import torch, dnnlib, os, pickle
 import torch_utils
 import matplotlib.pyplot as plt
+from datetime import datetime
 
-print("Demo 74: StyleGAN3 del Repositorio de Nvidia")
+horaInicio = datetime.now()
+print("Demo 74: StyleGAN3 del Repositorio de Nvidia con Personas de 1024 x 1024")
 archivo = "stylegan3-r-ffhq-1024x1024.pkl"
 if(not os.path.isfile(archivo)):
     url = "https://api.ngc.nvidia.com/v2/models/nvidia/research/stylegan3/versions/1/files/stylegan3-r-ffhq-1024x1024.pkl"
@@ -28,5 +30,10 @@ img = imagenesGeneradas[0]/2+0.5
 img = (img.clamp(0, 1) * 255).byte()
 img = img.permute(1,2,0).cpu().numpy()
 print("Shape Imagen Generada: ", img.shape)
+
+horaFin = datetime.now()
+tiempo = (horaFin - horaInicio).total_seconds()
+print(f"Tiempo de Procesamiento: {tiempo} seg")
+
 plt.imshow(img)
 plt.show()
