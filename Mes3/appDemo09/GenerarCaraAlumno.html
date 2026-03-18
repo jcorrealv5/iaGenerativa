@@ -1,0 +1,25 @@
+<body style="background-Color:lightblue">
+    {% load static %}
+    <h1>Demo 09: App Web que genera varias Caras Animadas de Alumnos con VAE</h1>
+    <h2>Generacion de Imagenes con Caras de Alumnos Animadas</h2>
+    <table>
+        <tr>
+            <td style="width:20%">Cara Inicio</td>
+            <td style="width:20%">Cara Fin</td>
+            <td style="width:20%">Num Muestras</td>
+            <td style="width:40%"></td>
+        </tr>
+        <tr>
+            <td><select id="cboCaraInicio" style="width:150px"></select></td>
+            <td><select id="cboCaraFin" style="width:150px"></select></td>
+            <td><input id="txtNumMuestras" type="text" value="10" style="width:150px" /></td>
+            <td>
+                <input id="btnGenerar" type="button" value="Generar Caras" />
+                <input id="btnNuevo" type="button" value="Nuevo" />
+            </td>
+        </tr>
+    </table>
+    <span id="spnProgreso"></span><br />
+    <img id="imgCara" width="100" height="100" />
+    <script src="{% static 'appDemo09/GenerarCaraAlumno.js' %}"></script>
+</body>

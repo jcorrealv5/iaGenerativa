@@ -1,0 +1,11 @@
+<body style="background-Color:lightblue">
+    {% load static %}
+    <h1>Demo 01: App Web que Genera una Ropa usando torch.hub</h1>
+    <h2>Consulta de Ropas</h2>
+    <div>
+        <input id="btnGenerar" type="button" value="Generar Ropa" />
+        <input id="btnGenerarAnimado" type="button" value="Generar Animado" />
+    </div>
+    <div><img id="imgRopa" width="128" height="128"/></div>
+    <script src="{% static 'appDemo01/ConsultaRopa.js' %}"></script>
+</body>
