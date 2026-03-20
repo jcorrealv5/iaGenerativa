@@ -1,0 +1,26 @@
+<body style="background-Color:lightblue">
+    {% load static %}
+    <h1>Demo 23: App Web que cambie la Risa de una foto tomada por la camara usando Cycle-GAN</h1>
+    <h2>Cambio de Risa entrenado con el DataSet CelebA</h2>
+    <table>
+        <tr>
+            <td style="width:100px">Risa:</td>
+            <td style="width:100px"><select id="cboRisa"></select></td>
+            <td style="width:500px">
+                <input id="btnActivarCamara" type="button" value="Activar Camara" />
+                <input id="btnTomarFoto" type="button" value="Tomar Foto" style="display:none" />
+                <input id="btnCambiarRisa" type="button" value="Cambiar Risa" />
+                <input id="btnNuevo" type="button" value="Nuevo Cambio" />
+            </td>
+        </tr>
+    </table>
+    <div>
+        <div><video id="video" width="500" height="400" style="float:left"></video></div>
+        <div><canvas id="canvas" width="500" height="400" style="float:left"></canvas></div>
+        <div style="float:left">
+            <img id="imgRisaCambiada" width="256" height="256" />
+        </div>
+    </div>
+    {% csrf_token %}
+    <script src="{% static 'appDemo23/CambioRisa.js' %}"></script>
+</body>
