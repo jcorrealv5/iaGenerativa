@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">appDemo03</string>
+    <string name="urlServicioWeb">http://190.43.181.198:8000/appDemo03/</string>
+</resources>
